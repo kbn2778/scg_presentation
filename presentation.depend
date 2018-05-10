@@ -1,6 +1,7 @@
 # depslib dependency file v1.0
-1525833913 source:c:\users\audit\desktop\presentation\main.cpp
+1525945751 source:c:\users\audit\desktop\presentation\main.cpp
 	<stdio.h>
+	<string.h>
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 

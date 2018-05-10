@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <string.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
 SDL_Window *window = NULL;
 SDL_Surface *src = NULL;
 SDL_Renderer *renderer;
@@ -19,6 +21,8 @@ public:
     double x,y;
     int rx,ry;
     bool On = false;
+    //0 : normal, 1 : attack, 2 : defense
+    int attack = 0;
 public:
     vecbox(){}
     void set(int rx,int ry){
@@ -35,11 +39,15 @@ public:
 class obj{
 public:
     double x,y,v=0;
-    bool direction;
+    //direction : true - toward left
+    bool direction,predirection;
     int state;
     int w,h;
     int rx=0,ry=0;
+    int dx=0,dy=0;
     int down_delay=0;
+    int motion_delay=0;
+    //player : true - player 1
     bool player;
     vecbox colbox[9];
     SDL_Texture *tex;
@@ -49,6 +57,7 @@ public:
         this->x = _x;
         this->y= _y;
         this->direction = dir;
+        this->predirection = dir;
         this->player = player;
         this->state = 0;
         SDL_QueryTexture(this->tex,NULL,NULL,&this->w,&this->h);
@@ -61,6 +70,7 @@ public:
         }
         for(int i=1;i<9;i+=3){
             this->colbox[i].On = true;
+            this->colbox[i].attack = 0;
         }
     }
     void gravity(){
@@ -70,7 +80,6 @@ public:
     }
     void move(){
         this->gravity();
-        if(this->down_delay>0)this->down_delay--;
         if(this->player){
             if(keystate[SDL_SCANCODE_A]){
                 this->x-=5;
@@ -84,6 +93,20 @@ public:
             if(keystate[SDL_SCANCODE_S] && this->down_delay<0){
                 this->state = 1;
                 this->down_delay = 20;
+            }
+            if(keystate[SDL_SCANCODE_G] && this->motion_delay<0){
+                this->state = 2;
+                this->motion_delay = 10;
+            }
+            if(keystate[SDL_SCANCODE_H] && this->motion_delay<0){
+                if(this->down_delay>0)this->state = 4;
+                else this->state = 3;
+                this->motion_delay = 10;
+            }
+            if(keystate[SDL_SCANCODE_J] && this->motion_delay<0){
+                if(this->down_delay>0)this->state = 6;
+                else this->state = 5;
+                this->motion_delay = 10;
             }
         }
         else{
@@ -100,36 +123,115 @@ public:
                 this->state = 1;
                 this->down_delay = 20;
             }
+            if(keystate[SDL_SCANCODE_KP_1] && this->motion_delay<0){
+                this->state = 2;
+                this->motion_delay = 10;
+            }
+            if(keystate[SDL_SCANCODE_KP_2] && this->motion_delay<0){
+                if(this->down_delay>0)this->state = 4;
+                else this->state = 3;
+                this->motion_delay = 10;
+            }
+            if(keystate[SDL_SCANCODE_KP_3] && this->motion_delay<0){
+                if(this->down_delay>0)this->state = 6;
+                else this->state = 5;
+                this->motion_delay = 10;
+            }
         }
 
         for(int i=0;i<9;i++){
             this->colbox[i].move(this->x,this->y);
         }
         this->down_delay--;
-        if(this->down_delay<0)this->state=0;
+        this->motion_delay--;
+        if(this->down_delay<0 && this->motion_delay <0)this->state=0;
 
     }
 
     void draw(){
-        int *cs= new int[9];
+        char cs[10];
         switch(this->state){
-            case 0 :
+            case 0 : //common state
                 this->rx=0;this->ry=0;
-                //cs = {0,1,0,0,1,0,0,1,0};
+                strcpy(cs,"010010010");
                 for(int i=0;i<9;i++){
-                    this->colbox[i].On = cs[i];
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
                 }
                 break;
-            case 1 :
+            case 1 : //sit down
                 this->rx=1;this->ry=0;
-                //int cs[9] = {0,0,0,0,1,0,0,1,0};
-                //for(int i=0;i<9;i++){
-                //    this->colbox[i].On = cs[i];
-                //}
+                strcpy(cs,"000010010");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
+                break;
+            case 2 : //punch
+                this->rx=2;this->ry=0;
+                strcpy(cs,"010011110");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
+                break;
+            case 3 : //high-kick
+                this->rx=3;this->ry=0;
+                strcpy(cs,"001110010");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
+                break;
+            case 4 : //low-kick
+                this->rx=0;this->ry=1;
+                strcpy(cs,"000010011");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
+                break;
+            case 5 : //guard on body
+                this->rx=1;this->ry=1;
+                strcpy(cs,"011011010");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
+                break;
+            case 6 : //guard on leg
+                this->rx=2;this->ry=1;
+                strcpy(cs,"010011010");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
+                break;
+            case 7 : // uppercut
+                this->rx=3;this->ry=1;
+                strcpy(cs,"011011110");
+                for(int i=0;i<9;i++){
+                    if(cs[i]=='0')this->colbox[i].On = false;
+                    else this->colbox[i].On = true;
+                }
                 break;
             default : ;
         }
-        rec.x=192*rx,rec.y=192*ry,rec.w=192,rec.h=192;
+        /*if(!this->direction){
+            for(int i=0;i<3;i++){
+                vecbox tmp;
+                tmp = this->colbox[3*i];
+                this->colbox[3*i] = this->colbox[2+3*i];
+                this->colbox[2+3*i] = tmp;
+            }
+            for(int i=0;i<9;i++){
+                if(this->colbox[i].On && this->state==2){
+                    printf("%d\n",i+1);
+                }
+            }
+        }*/
+
+        rec.x=192*this->rx,rec.y=192*this->ry,rec.w=192,rec.h=192;
         dst.x=this->x-96,dst.y=this->y-96,dst.w=192,dst.h=192;
         if(this->direction)SDL_RenderCopyEx(renderer,this->tex,&rec,&dst,0,NULL,SDL_FLIP_NONE);
         else SDL_RenderCopyEx(renderer,this->tex,&rec,&dst,0,NULL,SDL_FLIP_HORIZONTAL);
@@ -165,8 +267,33 @@ int main(int argc,char** argv)
             }
         }
         keystate = SDL_GetKeyboardState(0);
+
+        for(int i=0;i<9;i++){
+            for(int j=0;j<9;j++){
+                if(p1->colbox[i].On && p2->colbox[j].On){
+                    double p1_y[2] = {(p1->colbox[i].y-32),(p2->colbox[i].y+32)};
+                    double p2_y[2] = {(p2->colbox[j].y-32),(p2->colbox[j].y+32)};
+                    /*if(((p2->colbox[j].x-32) < (p1->colbox[i].x-32)) && ((p1->colbox[i].x-32) < (p2->colbox[j].x+32))){
+                        printf("true\n");
+                        if(((p2_y[0] < p1_y[0]) && (p1_y[0] < p2_y[1])) || ((p2_y[0] < p1_y[1]) && (p1_y[1] < p2_y[1]))){
+                            printf("collision\n");
+                        }
+                    }
+                    if(((p2->colbox[j].x-32) < (p1->colbox[i].x+32)) && ((p1->colbox[i].x+32) < (p2->colbox[j].x+32))){
+                        printf("true\n");
+                        if(((p2_y[0] < p1_y[0]) && (p1_y[0] < p2_y[1])) || ((p2_y[0] < p1_y[1]) && (p1_y[1] < p2_y[1]))){
+                            printf("collision\n");
+                        }
+                    }*/
+                    if(((p2->colbox[j].y-32) < (p1->colbox[i].y+32)) && ((p1->colbox[i].y+32) < (p2->colbox[j].y+32))){
+                        printf("true\n");
+                    }
+                }
+            }
+        }
         p1->update();
         p2->update();
+
         SDL_SetRenderDrawColor(renderer,255,255,157,0);
         SDL_RenderPresent(renderer);
         SDL_RenderClear(renderer);
