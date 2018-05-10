@@ -169,7 +169,8 @@ public:
                 break;
             case 2 : //punch
                 this->rx=2;this->ry=0;
-                strcpy(cs,"010011110");
+                if(this->direction)strcpy(cs,"010011110");
+                else strcpy(cs,"010110011");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
                     else this->colbox[i].On = true;
@@ -177,7 +178,8 @@ public:
                 break;
             case 3 : //high-kick
                 this->rx=3;this->ry=0;
-                strcpy(cs,"001110010");
+                if(this->direction)strcpy(cs,"001110010");
+                else strcpy(cs,"100011010");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
                     else this->colbox[i].On = true;
@@ -185,7 +187,8 @@ public:
                 break;
             case 4 : //low-kick
                 this->rx=0;this->ry=1;
-                strcpy(cs,"000010011");
+                if(this->direction)strcpy(cs,"000010011");
+                else strcpy(cs,"000010110");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
                     else this->colbox[i].On = true;
@@ -193,7 +196,8 @@ public:
                 break;
             case 5 : //guard on body
                 this->rx=1;this->ry=1;
-                strcpy(cs,"011011010");
+                if(this->direction)strcpy(cs,"011011010");
+                else strcpy(cs,"110110010");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
                     else this->colbox[i].On = true;
@@ -201,7 +205,8 @@ public:
                 break;
             case 6 : //guard on leg
                 this->rx=2;this->ry=1;
-                strcpy(cs,"010011010");
+                if(this->direction)strcpy(cs,"010011010");
+                else strcpy(cs,"010110010");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
                     else this->colbox[i].On = true;
@@ -209,7 +214,8 @@ public:
                 break;
             case 7 : // uppercut
                 this->rx=3;this->ry=1;
-                strcpy(cs,"011011110");
+                if(this->direction)strcpy(cs,"011011110");
+                else strcpy(cs,"110110011");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
                     else this->colbox[i].On = true;
@@ -217,19 +223,6 @@ public:
                 break;
             default : ;
         }
-        /*if(!this->direction){
-            for(int i=0;i<3;i++){
-                vecbox tmp;
-                tmp = this->colbox[3*i];
-                this->colbox[3*i] = this->colbox[2+3*i];
-                this->colbox[2+3*i] = tmp;
-            }
-            for(int i=0;i<9;i++){
-                if(this->colbox[i].On && this->state==2){
-                    printf("%d\n",i+1);
-                }
-            }
-        }*/
 
         rec.x=192*this->rx,rec.y=192*this->ry,rec.w=192,rec.h=192;
         dst.x=this->x-96,dst.y=this->y-96,dst.w=192,dst.h=192;
@@ -273,20 +266,21 @@ int main(int argc,char** argv)
                 if(p1->colbox[i].On && p2->colbox[j].On){
                     double p1_y[2] = {(p1->colbox[i].y-32),(p2->colbox[i].y+32)};
                     double p2_y[2] = {(p2->colbox[j].y-32),(p2->colbox[j].y+32)};
-                    /*if(((p2->colbox[j].x-32) < (p1->colbox[i].x-32)) && ((p1->colbox[i].x-32) < (p2->colbox[j].x+32))){
-                        printf("true\n");
-                        if(((p2_y[0] < p1_y[0]) && (p1_y[0] < p2_y[1])) || ((p2_y[0] < p1_y[1]) && (p1_y[1] < p2_y[1]))){
+                    if(((p2->colbox[j].x-32) < (p1->colbox[i].x-32)) && ((p1->colbox[i].x-32) < (p2->colbox[j].x+32))){
+                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y-32)) && ((p1->colbox[i].y-32) <= (p2->colbox[j].y+32))){
+                            printf("collision\n");
+                        }
+                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y+32)) && ((p1->colbox[i].y+32) <= (p2->colbox[j].y+32))){
                             printf("collision\n");
                         }
                     }
                     if(((p2->colbox[j].x-32) < (p1->colbox[i].x+32)) && ((p1->colbox[i].x+32) < (p2->colbox[j].x+32))){
-                        printf("true\n");
-                        if(((p2_y[0] < p1_y[0]) && (p1_y[0] < p2_y[1])) || ((p2_y[0] < p1_y[1]) && (p1_y[1] < p2_y[1]))){
+                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y-32)) && ((p1->colbox[i].y-32) <= (p2->colbox[j].y+32))){
                             printf("collision\n");
                         }
-                    }*/
-                    if(((p2->colbox[j].y-32) < (p1->colbox[i].y+32)) && ((p1->colbox[i].y+32) < (p2->colbox[j].y+32))){
-                        printf("true\n");
+                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y+32)) && ((p1->colbox[i].y+32) <= (p2->colbox[j].y+32))){
+                            printf("collision\n");
+                        }
                     }
                 }
             }
