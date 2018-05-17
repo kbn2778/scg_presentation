@@ -43,8 +43,10 @@ public:
     bool direction,predirection;
     int state;
     int w,h;
+    int hp = 100;
     int rx=0,ry=0;
     int dx=0,dy=0;
+    int hp_delay=0;
     int down_delay=0;
     int motion_delay=0;
     //player : true - player 1
@@ -79,6 +81,12 @@ public:
         if(this->y>base_y)this->y = base_y;
     }
     void move(){
+        if(this->x<0)this->x=winW;
+        if(this->x>winW)this->x=0;
+        if(this->hp_delay>0){
+            if(this->direction)this->x-=8;
+            else this->x+=8;
+        }
         this->gravity();
         if(this->player){
             if(keystate[SDL_SCANCODE_A]){
@@ -96,17 +104,17 @@ public:
             }
             if(keystate[SDL_SCANCODE_G] && this->motion_delay<0){
                 this->state = 2;
-                this->motion_delay = 10;
+                this->motion_delay = 8;
             }
             if(keystate[SDL_SCANCODE_H] && this->motion_delay<0){
                 if(this->down_delay>0)this->state = 4;
                 else this->state = 3;
-                this->motion_delay = 10;
+                this->motion_delay = 8;
             }
             if(keystate[SDL_SCANCODE_J] && this->motion_delay<0){
                 if(this->down_delay>0)this->state = 6;
                 else this->state = 5;
-                this->motion_delay = 10;
+                this->motion_delay = 8;
             }
         }
         else{
@@ -150,6 +158,10 @@ public:
 
     void draw(){
         char cs[10];
+        for(int i=0;i<9;i++){
+            this->colbox[i].On = false;
+            this->colbox[i].attack = 0;
+        }
         switch(this->state){
             case 0 : //common state
                 this->rx=0;this->ry=0;
@@ -169,56 +181,110 @@ public:
                 break;
             case 2 : //punch
                 this->rx=2;this->ry=0;
-                if(this->direction)strcpy(cs,"010011110");
-                else strcpy(cs,"010110011");
+                if(this->direction)strcpy(cs,"010012130");
+                else strcpy(cs,"010210031");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
-                    else this->colbox[i].On = true;
+                    else {
+                        this->colbox[i].On = true;
+                        if(cs[i]=='2'){
+                            colbox[i].attack = 1;
+                        }
+                        else if(cs[i]=='3'){
+                            colbox[i].attack = 2;
+                        }
+                        else colbox[i].attack=0;
+                    }
                 }
                 break;
             case 3 : //high-kick
                 this->rx=3;this->ry=0;
-                if(this->direction)strcpy(cs,"001110010");
-                else strcpy(cs,"100011010");
+                if(this->direction)strcpy(cs,"002110010");
+                else strcpy(cs,"200011010");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
-                    else this->colbox[i].On = true;
+                    else {
+                        this->colbox[i].On = true;
+                        if(cs[i]=='2'){
+                            colbox[i].attack = 1;
+                        }
+                        else if(cs[i]=='3'){
+                            colbox[i].attack = 2;
+                        }
+                        else colbox[i].attack=0;
+                    }
                 }
                 break;
             case 4 : //low-kick
                 this->rx=0;this->ry=1;
-                if(this->direction)strcpy(cs,"000010011");
-                else strcpy(cs,"000010110");
+                if(this->direction)strcpy(cs,"000010012");
+                else strcpy(cs,"000010210");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
-                    else this->colbox[i].On = true;
+                    else {
+                        this->colbox[i].On = true;
+                        if(cs[i]=='2'){
+                            colbox[i].attack = 1;
+                        }
+                        else if(cs[i]=='3'){
+                            colbox[i].attack = 2;
+                        }
+                        else colbox[i].attack=0;
+                    }
                 }
                 break;
             case 5 : //guard on body
                 this->rx=1;this->ry=1;
-                if(this->direction)strcpy(cs,"011011010");
-                else strcpy(cs,"110110010");
+                if(this->direction)strcpy(cs,"013013010");
+                else strcpy(cs,"310310010");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
-                    else this->colbox[i].On = true;
+                    else {
+                        this->colbox[i].On = true;
+                        if(cs[i]=='2'){
+                            colbox[i].attack = 1;
+                        }
+                        else if(cs[i]=='3'){
+                            colbox[i].attack = 2;
+                        }
+                        else colbox[i].attack=0;
+                    }
                 }
                 break;
             case 6 : //guard on leg
                 this->rx=2;this->ry=1;
-                if(this->direction)strcpy(cs,"010011010");
-                else strcpy(cs,"010110010");
+                if(this->direction)strcpy(cs,"010013010");
+                else strcpy(cs,"010310010");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
-                    else this->colbox[i].On = true;
+                    else {
+                        this->colbox[i].On = true;
+                        if(cs[i]=='2'){
+                            colbox[i].attack = 1;
+                        }
+                        else if(cs[i]=='3'){
+                            colbox[i].attack = 2;
+                        }
+                        else colbox[i].attack=0;
+                    }
                 }
                 break;
             case 7 : // uppercut
                 this->rx=3;this->ry=1;
-                if(this->direction)strcpy(cs,"011011110");
-                else strcpy(cs,"110110011");
+                if(this->direction)strcpy(cs,"012012110");
+                else strcpy(cs,"210210011");
                 for(int i=0;i<9;i++){
                     if(cs[i]=='0')this->colbox[i].On = false;
-                    else this->colbox[i].On = true;
+                    else {
+                        this->colbox[i].On = true;
+                        if(cs[i]=='2'){
+                            colbox[i].attack = 1;
+                        }
+                        else if(cs[i]=='3'){
+                            colbox[i].attack = 2;
+                        }
+                        else colbox[i].attack=0;
+                    }
                 }
                 break;
             default : ;
@@ -231,18 +297,53 @@ public:
     }
 
     void update(){
+        if(this->hp_delay>0)this->hp_delay--;
         this->move();
         this->draw();
     }
 };
+bool c_check(vecbox p1,vecbox p2){
+    if(p1.On && p2.On){
+        if(((p2.x-32) < (p1.x-32)) && ((p1.x-32) < (p2.x+32))){
+            if(((p2.y-32) <= (p1.y-32)) && ((p1.y-32) <= (p2.y+32))){
+                return true;
+            }
+            if(((p2.y-32) <= (p1.y+32)) && ((p1.y+32) <= (p2.y+32))){
+                return true;
+            }
+        }
+        if(((p2.x-32) < (p1.x+32)) && ((p1.x+32) < (p2.x+32))){
+            if(((p2.y-32) <= (p1.y-32)) && ((p1.y-32) <= (p2.y+32))){
+                return true;
+            }
+            if(((p2.y-32) <= (p1.y+32)) && ((p1.y+32) <= (p2.y+32))){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+int c_attack(vecbox *p1,vecbox *p2){
+    for(int i=0;i<9;i++){
+        for(int j=0;j<9;j++){
+            if(c_check(p1[i],p2[j])){
+                if(p1[i].attack==0 && p2[j].attack==1)return 10; //p1 attacked
+                else if(p2[j].attack==0 && p1[i].attack==1)return 1;//p2 attacked
+                else if(p1[i].attack==1 && p2[j].attack==2)return 2;//p1 defensed
+                else if(p2[j].attack==1 && p1[i].attack==2)return 2;//p2 defensed
+            }
+        }
+    }
+    return 0;
+}
 int main(int argc,char** argv)
 {
     bool running = true;
 
     SDL_Init(SDL_INIT_EVERYTHING);
-    window = SDL_CreateWindow("SDL_tutorial",240,120,winW,winH,0);
+    window = SDL_CreateWindow("scg_fight",240,120,winW,winH,0);
     renderer=SDL_CreateRenderer(window,-1,0);
-    printf("setting");
+
     obj *p1 = new obj(IMG_LoadTexture(renderer,"p1.png"),120,base_y,true,true);
     obj *p2 = new obj(IMG_LoadTexture(renderer,"p2.png"),720,base_y,false,false);
     while(running){
@@ -261,29 +362,27 @@ int main(int argc,char** argv)
         }
         keystate = SDL_GetKeyboardState(0);
 
-        for(int i=0;i<9;i++){
-            for(int j=0;j<9;j++){
-                if(p1->colbox[i].On && p2->colbox[j].On){
-                    double p1_y[2] = {(p1->colbox[i].y-32),(p2->colbox[i].y+32)};
-                    double p2_y[2] = {(p2->colbox[j].y-32),(p2->colbox[j].y+32)};
-                    if(((p2->colbox[j].x-32) < (p1->colbox[i].x-32)) && ((p1->colbox[i].x-32) < (p2->colbox[j].x+32))){
-                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y-32)) && ((p1->colbox[i].y-32) <= (p2->colbox[j].y+32))){
-                            printf("collision\n");
-                        }
-                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y+32)) && ((p1->colbox[i].y+32) <= (p2->colbox[j].y+32))){
-                            printf("collision\n");
-                        }
-                    }
-                    if(((p2->colbox[j].x-32) < (p1->colbox[i].x+32)) && ((p1->colbox[i].x+32) < (p2->colbox[j].x+32))){
-                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y-32)) && ((p1->colbox[i].y-32) <= (p2->colbox[j].y+32))){
-                            printf("collision\n");
-                        }
-                        if(((p2->colbox[j].y-32) <= (p1->colbox[i].y+32)) && ((p1->colbox[i].y+32) <= (p2->colbox[j].y+32))){
-                            printf("collision\n");
-                        }
-                    }
+        switch(c_attack(p1->colbox,p2->colbox)){
+            case 0 :
+                break;
+            case 1 :
+                if(p2->hp_delay<=0){
+                    p2->hp-=10;
+                    p2->hp_delay=10;
                 }
-            }
+                printf("hp p1 : %d p2 : %d\n",p1->hp,p2->hp);
+                break;
+            case 10 :
+                if(p1->hp_delay<=0){
+                    p1->hp-=10;
+                    p1->hp_delay=10;
+                }
+                printf("hp p1 : %d p2 : %d\n",p1->hp,p2->hp);
+                break;
+            case 2 :
+                printf("defense\n");
+                break;
+            default : ;
         }
         p1->update();
         p2->update();
