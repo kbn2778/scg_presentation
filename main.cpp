@@ -53,6 +53,7 @@ public:
     bool player;
     vecbox colbox[9];
     SDL_Texture *tex;
+    SDL_Rect hrec,brec;
 
     obj(SDL_Texture *_tex,int _x,int _y,bool dir,bool player){
         this->tex = _tex;
@@ -293,8 +294,18 @@ public:
         dst.x=this->x-96,dst.y=this->y-96,dst.w=192,dst.h=192;
         if(this->direction)SDL_RenderCopyEx(renderer,this->tex,&rec,&dst,0,NULL,SDL_FLIP_NONE);
         else SDL_RenderCopyEx(renderer,this->tex,&rec,&dst,0,NULL,SDL_FLIP_HORIZONTAL);
-    }
 
+        this->drawhpbar();
+    }
+    void drawhpbar(){
+        this->brec.x=60+480*!this->player,this->brec.y=40,this->brec.w=300,this->brec.h=30;
+        SDL_SetRenderDrawColor(renderer,0,0,0,SDL_ALPHA_OPAQUE);
+        SDL_RenderFillRect(renderer,&this->brec);
+
+        this->hrec.x=60+480*!this->player,this->hrec.y=40,this->hrec.w=300*this->hp/100,this->hrec.h=30;
+        SDL_SetRenderDrawColor(renderer,255,0,0,SDL_ALPHA_OPAQUE);
+        SDL_RenderFillRect(renderer,&this->hrec);
+    }
     void update(){
         if(this->hp_delay>0)this->hp_delay--;
         this->move();
@@ -385,8 +396,18 @@ int main(int argc,char** argv)
                 break;
             default : ;
         }
+
         p1->update();
         p2->update();
+
+        if(p1->hp<=0){
+            printf("player 2 is winner!");
+            running=false;
+        }
+        if(p2->hp<=0){
+            printf("player 1 is winner!");
+            running=false;
+        }
 
         SDL_SetRenderDrawColor(renderer,255,255,157,0);
         SDL_RenderPresent(renderer);
