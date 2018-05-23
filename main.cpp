@@ -40,7 +40,7 @@ class obj{
 public:
     double x,y,v=0;
     //direction : true - toward left
-    bool direction,predirection;
+    bool direction,bdirection;
     int state;
     int w,h;
     int hp = 100;
@@ -59,7 +59,6 @@ public:
         this->x = _x;
         this->y= _y;
         this->direction = dir;
-        this->predirection = dir;
         this->player = player;
         this->state = 0;
         SDL_QueryTexture(this->tex,NULL,NULL,&this->w,&this->h);
@@ -83,9 +82,9 @@ public:
     void move(){
         if(this->x<0)this->x=winW;
         if(this->x>winW)this->x=0;
-        if(this->hp_delay>0){
-            if(this->direction)this->x-=8;
-            else this->x+=8;
+        if(hp_delay>0){
+            if(bdirection)x+=8;
+            else x-=8;
         }
         this->gravity();
         if(this->player){
@@ -369,15 +368,17 @@ int main(int argc,char** argv)
                 if(p2->hp_delay<=0){
                     p2->hp-=10;
                     p2->hp_delay=10;
+                    if(p2->x > p1->x)p2->bdirection=true;
+                    else p2->bdirection=false;
                 }
-                printf("hp p1 : %d p2 : %d\n",p1->hp,p2->hp);
                 break;
             case 10 :
                 if(p1->hp_delay<=0){
                     p1->hp-=10;
                     p1->hp_delay=10;
+                    if(p1->x > p2->x)p1->bdirection=true;
+                    else p1->bdirection=false;
                 }
-                printf("hp p1 : %d p2 : %d\n",p1->hp,p2->hp);
                 break;
             case 2 :
                 printf("defense\n");
